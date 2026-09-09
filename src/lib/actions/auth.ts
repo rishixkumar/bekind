@@ -13,6 +13,15 @@ function formString(formData: FormData, key: string) {
   return String(formData.get(key) ?? "");
 }
 
+function safeInternalPath(value: string) {
+  if (value.startsWith("/") && !value.startsWith("//")) return value;
+  return "/";
+}
+
+function isDefaultHome(path: string) {
+  return path === "/" || path === "/login" || path === "/signup";
+}
+
 export async function signUpAction(
   _prev: ActionState,
   formData: FormData,
@@ -52,18 +61,20 @@ export async function signUpAction(
   }
 
   const passwordHash = await hash(parsed.data.password, 10);
+  const admin = isAdminEmail(parsed.data.email);
   await db.insert(users).values({
     email: parsed.data.email,
     username: parsed.data.username,
     passwordHash,
-    role: isAdminEmail(parsed.data.email) ? "admin" : "user",
+    role: admin ? "admin" : "user",
+    lastLoginAt: new Date(),
   });
 
   try {
     await signIn("credentials", {
       email: parsed.data.email,
       password: parsed.data.password,
-      redirectTo: "/",
+      redirectTo: admin ? "/admin" : "/",
     });
   } catch (error) {
     if (error instanceof AuthError) {
@@ -88,13 +99,15 @@ export async function loginAction(
     return { error: "Enter your email and password." };
   }
 
-  const next = formString(formData, "next") || "/";
+  const next = safeInternalPath(formString(formData, "next"));
+  const redirectTo =
+    isAdminEmail(parsed.data.email) && isDefaultHome(next) ? "/admin" : next;
 
   try {
     await signIn("credentials", {
       email: parsed.data.email,
       password: parsed.data.password,
-      redirectTo: next.startsWith("/") ? next : "/",
+      redirectTo,
     });
   } catch (error) {
     if (error instanceof AuthError) {

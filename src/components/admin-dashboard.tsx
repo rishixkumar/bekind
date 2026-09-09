@@ -3,6 +3,7 @@
 import Link from "next/link";
 import {
   banUserAction,
+  deletePostAsAdmin,
   hidePostAsAdmin,
   hideReplyAsAdmin,
   resolveReportAction,
@@ -26,6 +27,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type Stats = {
   users: number;
+  logins: number;
   posts: number;
   replies: number;
   openReports: number;
@@ -100,8 +102,9 @@ export function AdminDashboard({
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         <StatCard label="Users" value={stats.users} />
+        <StatCard label="Logins" value={stats.logins} />
         <StatCard label="Posts" value={stats.posts} />
         <StatCard label="Replies" value={stats.replies} />
         <StatCard label="Open reports" value={stats.openReports} />
@@ -264,19 +267,26 @@ export function AdminDashboard({
                     {post.hiddenAt ? `Hidden (${post.hiddenBy})` : "Public"}
                   </TableCell>
                   <TableCell>
-                    {post.hiddenAt ? (
-                      <form action={restorePostAsAdmin.bind(null, post.id)}>
-                        <Button type="submit" size="sm" variant="outline">
-                          Restore
+                    <div className="flex flex-wrap gap-2">
+                      {post.hiddenAt ? (
+                        <form action={restorePostAsAdmin.bind(null, post.id)}>
+                          <Button type="submit" size="sm" variant="outline">
+                            Restore
+                          </Button>
+                        </form>
+                      ) : (
+                        <form action={hidePostAsAdmin.bind(null, post.id)}>
+                          <Button type="submit" size="sm" variant="destructive">
+                            Hide
+                          </Button>
+                        </form>
+                      )}
+                      <form action={deletePostAsAdmin.bind(null, post.id)}>
+                        <Button type="submit" size="sm" variant="ghost">
+                          Delete
                         </Button>
                       </form>
-                    ) : (
-                      <form action={hidePostAsAdmin.bind(null, post.id)}>
-                        <Button type="submit" size="sm" variant="destructive">
-                          Hide
-                        </Button>
-                      </form>
-                    )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

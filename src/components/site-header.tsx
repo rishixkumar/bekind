@@ -16,7 +16,7 @@ export async function SiteHeader() {
           {user ? (
             <>
               {user.isAdmin ? (
-                <Button variant="ghost" size="sm" asChild>
+                <Button variant="outline" size="sm" asChild>
                   <Link href="/admin">Admin</Link>
                 </Button>
               ) : null}

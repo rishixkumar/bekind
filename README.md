@@ -21,3 +21,129 @@ npm run dev
 The account that signs up with `ADMIN_EMAIL` can open `/admin` (users, logins, reports, hide/restore, bans).
 
 This is not a crisis service. The site footer links to [988](https://988lifeline.org/).
+
+## Architecture
+
+One Next.js App Router app (not a separate Express API). Pages, Server Actions, and Auth.js all live in the same process.
+
+**Frontend**
+
+- App Router pages in `src/app`
+- React client components for forms, the anonymous toggle, report dialog, upvote button, and admin dashboard
+- shadcn/ui + Tailwind
+- Student-native copy and layout (Nunito, compact “room” feed)
+
+**Backend**
+
+- Server Components load data on the server (`src/lib/queries.ts`, `src/lib/session.ts`)
+- Server Actions in `src/lib/actions/*` handle writes
+- Auth.js (NextAuth v5) in `src/auth.ts`, routed at `/api/auth/[...nextauth]`
+- Drizzle ORM + Neon Postgres (`src/db`)
+- Admin is whoever matches `ADMIN_EMAIL` (role is also stored as `admin` on that user)
+
+**Routes**
+
+| Path | Who | What |
+| --- | --- | --- |
+| `/` | anyone | Newest-first feed |
+| `/posts/[id]` | anyone | Thread + replies |
+| `/posts/new` | signed-in, not banned | Compose |
+| `/login`, `/signup` | guests | Credentials auth |
+| `/admin` | admin only (everyone else gets 404) | Users, reports, hide/restore, bans |
+
+**Tables** (`src/db/schema.ts`)
+
+- `users` — email, username, password hash, role, `lastLoginAt`, `bannedAt`
+- `posts` — title, body, `isAnonymous`, `hiddenAt` / `hiddenBy`
+- `replies` — nested via `parentId`, same anonymous + hide fields
+- `votes` — one row per user+post or user+reply
+- `reports` — target type/id, reason, open/resolved
+
+## Data flow
+
+Guests never hit an auth check on the feed. Writes always go through a Server Action that requires a session and rejects banned accounts.
+
+```mermaid
+flowchart TD
+  Neon[(Neon Postgres)]
+
+  subgraph guestRead [Guest feed]
+    Guest[Guest browser]
+    HomePage["/ Server Component"]
+    GetFeed[getFeedPosts]
+    Guest --> HomePage --> GetFeed
+  end
+
+  GetFeed --> Neon
+  Neon --> GetFeed
+  GetFeed --> HomePage
+  HomePage --> Guest
+
+  subgraph writePath [Signed-in write]
+    Form[Client form]
+    Action[Server Action]
+    Session[requireActiveUser]
+    Drizzle[Drizzle insert or update]
+    Revalidate[revalidatePath]
+    Form --> Action --> Session --> Drizzle
+  end
+
+  Drizzle --> Neon
+  Drizzle --> Revalidate
+```
+
+Auth, anonymity, votes, and moderation:
+
+```mermaid
+flowchart TD
+  Users[(users)]
+  Posts[(posts / replies)]
+  Votes[(votes)]
+  Reports[(reports)]
+
+  subgraph authFlow [Auth]
+    Signup[signUpAction]
+    Hash[bcrypt hash]
+    Login[loginAction]
+    AuthJS["Auth.js credentials"]
+    JWT[JWT session]
+    Signup --> Hash --> Users
+    Login --> AuthJS --> Users
+    AuthJS --> JWT
+  end
+
+  subgraph anonFlow [Anonymous]
+    Flag["isAnonymous stored on row"]
+    PublicUI["Public UI: Anonymous"]
+    AdminUI["Admin / author: real username"]
+    Flag --> PublicUI
+    Flag --> AdminUI
+  end
+
+  subgraph voteFlow [Upvotes]
+    Toggle[toggle vote action]
+    Toggle -->|"row exists: delete"| Votes
+    Toggle -->|"no row: insert"| Votes
+  end
+
+  subgraph modFlow [Reports and admin]
+    ReportAction[reportContentAction]
+    Hide["hide: set hiddenAt"]
+    Ban["ban: set bannedAt"]
+    ReportAction --> Reports
+    Hide --> Posts
+    Ban --> Users
+  end
+```
+
+**Read:** `/` is a Server Component. It optionally loads the session (`getAppUser`) so upvote state can be personalized, then `getFeedPosts` queries Neon and renders. Hidden posts (`hiddenAt` set) are omitted. No login required.
+
+**Write:** Client form → Server Action → `requireActiveUser` (must be logged in and not banned) → Zod parse → Drizzle insert/update → `revalidatePath`. Banned users can still read; posting is paused.
+
+**Auth:** Signup hashes the password with bcrypt and inserts into `users` (admin role if the email is `ADMIN_EMAIL`), then signs in. Login goes through Auth.js credentials, compares the hash, updates `lastLoginAt`, and issues a JWT session.
+
+**Anonymous:** `isAnonymous` is a flag on the post/reply row. Author id is always stored. Public pages render “Anonymous”; the author sees “Anonymous · you”; admin pages and `displayName(..., isAdmin)` show the real username.
+
+**Report / hide / ban:** A report inserts into `reports`. Admin hide/restore is a soft hide (`hiddenAt` / `hiddenBy`). Ban sets `bannedAt`. Admin can also hard-delete a post.
+
+**Upvotes:** Toggle inserts or deletes the unique vote row, then revalidates the feed and thread.

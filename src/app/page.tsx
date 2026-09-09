@@ -9,6 +9,7 @@ export const dynamic = "force-dynamic";
 export default async function HomePage() {
   const user = await getAppUser();
   const posts = await getFeedPosts(user);
+  const composeHref = user ? "/posts/new" : "/login?next=/posts/new";
 
   return (
     <div className="flex flex-col gap-5">
@@ -16,26 +17,22 @@ export default async function HomePage() {
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight">The room</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Newest thoughts first. Reply with kindness.
+            Newest thoughts first. Anyone can read. Log in to post.
           </p>
         </div>
-        {user ? (
-          <Button asChild>
-            <Link href="/posts/new">New post</Link>
-          </Button>
-        ) : null}
+        <Button asChild>
+          <Link href={composeHref}>New post</Link>
+        </Button>
       </div>
 
       {posts.length === 0 ? (
         <div className="rounded-3xl bg-card px-6 py-12 text-center shadow-sm ring-1 ring-foreground/5">
-          <p className="text-lg font-semibold">It’s quiet in here.</p>
+          <p className="text-lg font-semibold">No posts yet — be the first</p>
           <p className="mt-2 text-sm text-muted-foreground">
-            Be the first to share what’s on your mind.
+            Share what’s on your mind. You can use your name or stay anonymous.
           </p>
           <Button className="mt-4" asChild>
-            <Link href={user ? "/posts/new" : "/signup"}>
-              {user ? "Write a post" : "Join Be Kind"}
-            </Link>
+            <Link href={composeHref}>New post</Link>
           </Button>
         </div>
       ) : (

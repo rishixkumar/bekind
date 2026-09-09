@@ -1,23 +1,27 @@
 "use server";
 
-import { count, desc, eq, isNull, sql } from "drizzle-orm";
+import { count, desc, eq, isNotNull, isNull, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getDb } from "@/db";
 import { posts, replies, reports, users } from "@/db/schema";
+import { isAdminEmail } from "@/lib/constants";
 import { requireAdmin } from "@/lib/session";
 
 export async function getAdminStats() {
   await requireAdmin();
   const db = getDb();
-  const [[userCount], [postCount], [replyCount], [reportCount]] = await Promise.all([
-    db.select({ n: count() }).from(users),
-    db.select({ n: count() }).from(posts).where(isNull(posts.hiddenAt)),
-    db.select({ n: count() }).from(replies).where(isNull(replies.hiddenAt)),
-    db.select({ n: count() }).from(reports).where(eq(reports.status, "open")),
-  ]);
+  const [[userCount], [loginCount], [postCount], [replyCount], [reportCount]] =
+    await Promise.all([
+      db.select({ n: count() }).from(users),
+      db.select({ n: count() }).from(users).where(isNotNull(users.lastLoginAt)),
+      db.select({ n: count() }).from(posts).where(isNull(posts.hiddenAt)),
+      db.select({ n: count() }).from(replies).where(isNull(replies.hiddenAt)),
+      db.select({ n: count() }).from(reports).where(eq(reports.status, "open")),
+    ]);
 
   return {
     users: Number(userCount?.n ?? 0),
+    logins: Number(loginCount?.n ?? 0),
     posts: Number(postCount?.n ?? 0),
     replies: Number(replyCount?.n ?? 0),
     openReports: Number(reportCount?.n ?? 0),
@@ -27,7 +31,13 @@ export async function getAdminStats() {
 export async function getAdminUsers() {
   await requireAdmin();
   const db = getDb();
-  return db.select().from(users).orderBy(desc(users.createdAt));
+  const rows = await db.select().from(users).orderBy(desc(users.createdAt));
+  return rows.map((row) => ({
+    ...row,
+    role: (row.role === "admin" || isAdminEmail(row.email) ? "admin" : "user") as
+      | "user"
+      | "admin",
+  }));
 }
 
 export async function getAdminReports() {
@@ -91,6 +101,14 @@ export async function getAdminContent() {
   ]);
 
   return { posts: postRows, replies: replyRows };
+}
+
+export async function deletePostAsAdmin(postId: string) {
+  await requireAdmin();
+  const db = getDb();
+  await db.delete(posts).where(eq(posts.id, postId));
+  revalidatePath("/");
+  revalidatePath("/admin");
 }
 
 export async function hidePostAsAdmin(postId: string) {

@@ -36,12 +36,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const valid = await compare(parsed.data.password, user.passwordHash);
         if (!valid) return null;
 
+        const isAdmin = user.role === "admin" || isAdminEmail(user.email);
+
         await db
           .update(users)
-          .set({ lastLoginAt: new Date() })
+          .set({
+            lastLoginAt: new Date(),
+            ...(isAdmin ? { role: "admin" as const } : {}),
+          })
           .where(eq(users.id, user.id));
-
-        const isAdmin = user.role === "admin" || isAdminEmail(user.email);
 
         return {
           id: user.id,

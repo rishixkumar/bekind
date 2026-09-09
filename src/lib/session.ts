@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { getDb } from "@/db";
 import { users } from "@/db/schema";
@@ -50,8 +50,8 @@ export async function requireActiveUser() {
 }
 
 export async function requireAdmin() {
-  const user = await requireUser();
-  if (!user.isAdmin) redirect("/");
+  const user = await getAppUser();
+  if (!user?.isAdmin) notFound();
   return user;
 }
 

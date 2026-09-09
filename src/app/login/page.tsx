@@ -10,9 +10,10 @@ export default async function LoginPage({
   searchParams: Promise<{ next?: string }>;
 }) {
   const user = await getAppUser();
-  if (user) redirect("/");
+  if (user) redirect(user.isAdmin ? "/admin" : "/");
   const { next } = await searchParams;
-  const nextPath = next?.startsWith("/") ? next : "/";
+  const nextPath =
+    next?.startsWith("/") && !next.startsWith("//") ? next : "/";
 
   return (
     <Card className="mx-auto w-full max-w-md shadow-sm">
@@ -26,6 +27,13 @@ export default async function LoginPage({
           <Link href="/signup" className="font-medium text-foreground underline-offset-2 hover:underline">
             Create an account
           </Link>
+        </p>
+        <p className="text-center text-sm text-muted-foreground">
+          Or{" "}
+          <Link href="/" className="font-medium text-foreground underline-offset-2 hover:underline">
+            read the room
+          </Link>{" "}
+          without an account.
         </p>
       </CardContent>
     </Card>
