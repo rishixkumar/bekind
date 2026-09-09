@@ -96,7 +96,7 @@ export function AdminDashboard({
   return (
     <div className="flex flex-col gap-6 overflow-x-auto">
       <div>
-        <h1 className="text-3xl font-extrabold tracking-tight">Admin</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-gt-navy">Admin</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Users, logins, reports, and the real author behind anonymous posts.
         </p>
@@ -111,7 +111,7 @@ export function AdminDashboard({
       </div>
 
       <Tabs defaultValue="reports">
-        <TabsList>
+        <TabsList variant="line" className="w-full justify-start border-b border-border">
           <TabsTrigger value="reports">Reports</TabsTrigger>
           <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="posts">Posts</TabsTrigger>
@@ -347,10 +347,12 @@ export function AdminDashboard({
 
 function StatCard({ label, value }: { label: string; value: number }) {
   return (
-    <Card size="sm">
+    <Card size="sm" className="border-border shadow-sm">
       <CardContent className="px-3">
-        <div className="text-xs text-muted-foreground">{label}</div>
-        <div className="text-2xl font-extrabold">{value}</div>
+        <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          {label}
+        </div>
+        <div className="text-2xl font-bold text-gt-navy">{value}</div>
       </CardContent>
     </Card>
   );

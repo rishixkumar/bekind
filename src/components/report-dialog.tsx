@@ -32,7 +32,7 @@ export function ReportDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="sm" className="rounded-full text-muted-foreground">
+        <Button variant="ghost" size="sm" className="text-muted-foreground">
           <Flag className="size-3.5" />
           Report
         </Button>

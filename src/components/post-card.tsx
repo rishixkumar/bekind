@@ -23,7 +23,7 @@ export function PostCard({
   });
 
   return (
-    <Card className="shadow-sm ring-foreground/5 transition-shadow hover:shadow-md">
+    <Card className="border-border shadow-sm transition-shadow hover:shadow-md">
       <CardContent className="flex flex-col gap-3 px-4 py-1">
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <span className="font-medium text-foreground">{name}</span>
@@ -33,7 +33,7 @@ export function PostCard({
           <span>· {formatTimeAgo(post.createdAt)}</span>
         </div>
         <Link href={`/posts/${post.id}`} className="group">
-          <h2 className="text-lg font-bold leading-snug group-hover:underline">
+          <h2 className="text-lg font-bold leading-snug text-gt-navy group-hover:underline">
             {post.title}
           </h2>
           <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
@@ -49,7 +49,7 @@ export function PostCard({
           />
           <Link
             href={`/posts/${post.id}`}
-            className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 hover:bg-muted"
+            className="inline-flex items-center gap-1 rounded-md px-2.5 py-1 hover:bg-muted"
           >
             <MessageCircle className="size-4" />
             {post.replyCount}

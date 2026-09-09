@@ -63,7 +63,7 @@ export function ReplyTree({
         return (
           <li
             key={reply.id}
-            className="rounded-2xl bg-card/80 p-3 ring-1 ring-foreground/5"
+            className="rounded-md border border-border bg-card p-3"
           >
             {reply.hiddenAt ? (
               <p className="text-xs text-muted-foreground">
@@ -91,7 +91,7 @@ export function ReplyTree({
               {user && !user.isBanned ? (
                 <details>
                   <summary className="cursor-pointer list-none text-sm text-muted-foreground hover:text-foreground">
-                    <span className="inline-flex h-7 items-center rounded-full px-2.5 hover:bg-muted">
+                    <span className="inline-flex h-7 items-center rounded-md px-2.5 hover:bg-muted">
                       Reply
                     </span>
                   </summary>
@@ -107,7 +107,7 @@ export function ReplyTree({
               {user && !user.isBanned ? (
                 <ReportDialog targetType="reply" targetId={reply.id} />
               ) : user ? null : (
-                <Button variant="ghost" size="sm" className="rounded-full" asChild>
+                <Button variant="ghost" size="sm" asChild>
                   <Link href={loginHref}>Report</Link>
                 </Button>
               )}
@@ -115,7 +115,7 @@ export function ReplyTree({
                 <>
                   <details>
                     <summary className="cursor-pointer list-none text-sm text-muted-foreground hover:text-foreground">
-                      <span className="inline-flex h-7 items-center rounded-full px-2.5 hover:bg-muted">
+                      <span className="inline-flex h-7 items-center rounded-md px-2.5 hover:bg-muted">
                         Edit
                       </span>
                     </summary>
@@ -126,7 +126,6 @@ export function ReplyTree({
                       type="submit"
                       variant="ghost"
                       size="sm"
-                      className="rounded-full"
                     >
                       Delete
                     </Button>

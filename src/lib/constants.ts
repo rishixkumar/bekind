@@ -1,4 +1,4 @@
-export const SITE_NAME = "Be Kind";
+export const SITE_NAME = "BK";
 
 export const REPORT_REASONS = [
   "Unkind or harmful",

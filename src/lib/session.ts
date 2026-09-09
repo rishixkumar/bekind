@@ -3,7 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { getDb } from "@/db";
 import { users } from "@/db/schema";
-import { isAdminEmail } from "@/lib/constants";
+import { SITE_NAME, isAdminEmail } from "@/lib/constants";
 
 export type AppUser = {
   id: string;
@@ -56,5 +56,5 @@ export async function requireAdmin() {
 }
 
 export function bannedMessage() {
-  return "Your account can still read Be Kind, but posting is paused.";
+  return `Your account can still read ${SITE_NAME}, but posting is paused.`;
 }

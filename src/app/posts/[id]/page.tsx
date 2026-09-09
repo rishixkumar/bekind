@@ -11,8 +11,9 @@ import { createReplyAction } from "@/lib/actions/replies";
 import { deletePostAction, updatePostAction } from "@/lib/actions/posts";
 import { togglePostVote } from "@/lib/actions/votes";
 import { displayName, formatTimeAgo, wasEdited } from "@/lib/format";
+import { bannedMessage, getAppUser } from "@/lib/session";
 import { getThread } from "@/lib/queries";
-import { getAppUser } from "@/lib/session";
+import { SITE_NAME } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
 
@@ -38,7 +39,7 @@ export default async function PostPage({
 
   return (
     <article className="flex flex-col gap-6">
-      <div className="rounded-3xl bg-card p-5 shadow-sm ring-1 ring-foreground/5">
+      <div className="rounded-md border border-border bg-card p-5 shadow-sm">
         {post.hiddenAt ? (
           <p className="mb-3 text-xs text-muted-foreground">
             Hidden from the public ({post.hiddenBy})
@@ -50,7 +51,7 @@ export default async function PostPage({
           <span>· {formatTimeAgo(post.createdAt)}</span>
           {wasEdited(post.createdAt, post.updatedAt) ? <span>· edited</span> : null}
         </div>
-        <h1 className="mt-3 text-2xl font-extrabold tracking-tight">{post.title}</h1>
+        <h1 className="mt-3 text-2xl font-bold tracking-tight text-gt-navy">{post.title}</h1>
         <p className="mt-3 whitespace-pre-wrap text-base leading-relaxed">{post.body}</p>
         <div className="mt-4 flex flex-wrap items-center gap-1">
           <UpvoteButton
@@ -62,7 +63,7 @@ export default async function PostPage({
           {user && !user.isBanned ? (
             <ReportDialog targetType="post" targetId={post.id} />
           ) : user ? null : (
-            <Button variant="ghost" size="sm" className="rounded-full" asChild>
+            <Button variant="ghost" size="sm" asChild>
               <Link href={loginHref}>Report</Link>
             </Button>
           )}
@@ -70,7 +71,7 @@ export default async function PostPage({
             <>
               <details>
                 <summary className="cursor-pointer list-none text-sm text-muted-foreground">
-                  <span className="inline-flex h-7 items-center rounded-full px-2.5 hover:bg-muted">
+                  <span className="inline-flex h-7 items-center rounded-md px-2.5 hover:bg-muted">
                     Edit
                   </span>
                 </summary>
@@ -85,7 +86,7 @@ export default async function PostPage({
                 </div>
               </details>
               <form action={deletePostAction.bind(null, post.id)}>
-                <Button type="submit" variant="ghost" size="sm" className="rounded-full">
+                <Button type="submit" variant="ghost" size="sm">
                   Delete
                 </Button>
               </form>
@@ -95,27 +96,31 @@ export default async function PostPage({
       </div>
 
       <section className="flex flex-col gap-4">
-        <h2 className="text-lg font-bold">
+        <h2 className="text-lg font-bold text-gt-navy">
           Replies{" "}
           <span className="font-medium text-muted-foreground">({post.replyCount})</span>
         </h2>
         {user && !user.isBanned ? (
-          <div className="rounded-3xl bg-card p-4 ring-1 ring-foreground/5">
+          <div className="rounded-md border border-border bg-card p-4">
             <ReplyForm action={createReplyAction.bind(null, post.id)} />
           </div>
         ) : user ? (
-          <p className="text-sm text-muted-foreground">
-            Your account can still read Be Kind, but posting is paused.
-          </p>
+          <p className="text-sm text-muted-foreground">{bannedMessage()}</p>
         ) : (
           <p className="text-sm text-muted-foreground">
-            <Link href={loginHref} className="font-medium text-foreground underline-offset-2 hover:underline">
+            <Link href={loginHref} className="font-medium text-gt-navy underline-offset-2 hover:underline">
               Log in
             </Link>{" "}
             to reply.
           </p>
         )}
-        <ReplyTree replies={replies} postId={post.id} user={user} />
+        {replies.length === 0 ? (
+          <p className="rounded-md border border-dashed border-border bg-card px-4 py-8 text-center text-sm text-muted-foreground">
+            No replies yet. Be the first on {SITE_NAME}.
+          </p>
+        ) : (
+          <ReplyTree replies={replies} postId={post.id} user={user} />
+        )}
       </section>
     </article>
   );

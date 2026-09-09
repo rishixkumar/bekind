@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { signUpAction } from "@/lib/actions/auth";
+import { SITE_NAME } from "@/lib/constants";
 import type { ActionState } from "@/lib/validations";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -53,7 +54,7 @@ export function SignupForm() {
       </div>
       {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
       <Button type="submit" disabled={pending}>
-        {pending ? "Creating account…" : "Create account"}
+        {pending ? "Creating account…" : `Join ${SITE_NAME}`}
       </Button>
     </form>
   );

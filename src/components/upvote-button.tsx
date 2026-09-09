@@ -25,7 +25,7 @@ export function UpvoteButton({
 
   if (loginHref) {
     return (
-      <Button variant="ghost" size="sm" className="rounded-full" asChild>
+      <Button variant="ghost" size="sm" asChild>
         <Link href={loginHref}>{inner}</Link>
       </Button>
     );
@@ -37,7 +37,6 @@ export function UpvoteButton({
         type="submit"
         variant="ghost"
         size="sm"
-        className="rounded-full"
         aria-pressed={voted}
       >
         {inner}
