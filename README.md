@@ -18,6 +18,8 @@ npm run db:push
 npm run dev
 ```
 
+`npm run db:push` applies Drizzle schema to the shared Neon database. Additive nullable columns (e.g. `users.signup_ip`, `users.signup_location`) are safe: existing rows stay null and older deploys that ignore the columns keep working. Do not use push to drop or rename columns on this DB.
+
 The account that signs up with `ADMIN_EMAIL` can open `/admin` (users, logins, reports, hide/restore, bans).
 
 `RESEND_API_KEY` is optional and unused for signup right now (kept for a future mailer).
@@ -62,7 +64,7 @@ One Next.js App Router app (not a separate Express API). Pages, Server Actions, 
 
 **Tables** (`src/db/schema.ts`)
 
-- `users` — email, username, password hash, role, `lastLoginAt`, `bannedAt`, `emailVerifiedAt`
+- `users` — email, username, password hash, role, `lastLoginAt`, `bannedAt`, `emailVerifiedAt`, `signupIp`, `signupLocation`
 - `email_verification_tokens` — legacy; unused by the app path today
 - `posts` — title, body, `isAnonymous`, `hiddenAt` / `hiddenBy`
 - `replies` — nested via `parentId`, same anonymous + hide fields
