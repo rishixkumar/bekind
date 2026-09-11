@@ -195,4 +195,42 @@
   .site-enter-wash {
     display: none;
   }
+
+  .smooth-textarea,
+  .smooth-compose-input {
+    transition: none !important;
+  }
+}
+
+/* Compose surfaces — soft caret / selection, Word-like measure */
+.smooth-textarea,
+.smooth-compose-input {
+  caret-color: var(--gt-navy);
+  scrollbar-width: thin;
+}
+
+.dark .smooth-textarea,
+.dark .smooth-compose-input {
+  caret-color: var(--gt-gold);
+}
+
+.smooth-textarea::selection,
+.smooth-compose-input::selection {
+  background: color-mix(in srgb, var(--gt-gold) 35%, transparent);
+  color: var(--foreground);
+}
+
+.dark .smooth-textarea::selection,
+.dark .smooth-compose-input::selection {
+  background: color-mix(in srgb, var(--gt-gold) 40%, transparent);
+}
+
+.smooth-textarea:focus-visible,
+.smooth-compose-input:focus-visible {
+  background: color-mix(in srgb, var(--card) 92%, var(--gt-gold));
+}
+
+.dark .smooth-textarea:focus-visible,
+.dark .smooth-compose-input:focus-visible {
+  background: color-mix(in srgb, var(--card) 88%, var(--gt-navy));
 }
