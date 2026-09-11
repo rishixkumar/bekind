@@ -73,3 +73,15 @@ export type ActionState = {
   error?: string;
   fieldErrors?: Record<string, string>;
 };
+
+/** What a hard user delete swept away, so the dashboard can say it out loud. */
+export type DeleteUserTally = {
+  username: string;
+  posts: number;
+  replies: number;
+  votes: number;
+  reports: number;
+  tokens: number;
+};
+
+export type DeleteUserResult = { error: string } | { deleted: DeleteUserTally };

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import {
   banUserAction,
@@ -12,6 +13,9 @@ import {
   unbanUserAction,
 } from "@/lib/actions/admin";
 import { formatTimeAgo } from "@/lib/format";
+import type { DeleteUserTally } from "@/lib/validations";
+import { AdminDeleteUserDialog } from "@/components/admin-delete-user-dialog";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -41,6 +45,8 @@ type AdminUser = {
   lastLoginAt: Date | null;
   bannedAt: Date | null;
   createdAt: Date;
+  postCount: number;
+  replyCount: number;
 };
 
 type AdminReport = {
@@ -93,6 +99,8 @@ export function AdminDashboard({
   posts: AdminPost[];
   replies: AdminReply[];
 }) {
+  const [erased, setErased] = useState<DeleteUserTally | null>(null);
+
   return (
     <div className="flex flex-col gap-6 overflow-x-auto">
       <div>
@@ -101,6 +109,19 @@ export function AdminDashboard({
           Users, logins, reports, and the real author behind anonymous posts.
         </p>
       </div>
+
+      {erased ? (
+        <Alert>
+          <AlertTitle>Deleted {erased.username}</AlertTitle>
+          <AlertDescription>
+            Removed {erased.posts} {erased.posts === 1 ? "post" : "posts"},{" "}
+            {erased.replies} {erased.replies === 1 ? "reply" : "replies"},{" "}
+            {erased.votes} {erased.votes === 1 ? "vote" : "votes"}, and{" "}
+            {erased.reports} filed {erased.reports === 1 ? "report" : "reports"}.
+            That email and username are free again.
+          </AlertDescription>
+        </Alert>
+      ) : null}
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         <StatCard label="Users" value={stats.users} />
@@ -217,18 +238,30 @@ export function AdminDashboard({
                     )}
                   </TableCell>
                   <TableCell>
-                    {person.role === "admin" ? null : person.bannedAt ? (
-                      <form action={unbanUserAction.bind(null, person.id)}>
-                        <Button type="submit" size="sm" variant="outline">
-                          Unban
-                        </Button>
-                      </form>
-                    ) : (
-                      <form action={banUserAction.bind(null, person.id)}>
-                        <Button type="submit" size="sm" variant="destructive">
-                          Ban
-                        </Button>
-                      </form>
+                    {person.role === "admin" ? null : (
+                      <div className="flex flex-wrap gap-2">
+                        {person.bannedAt ? (
+                          <form action={unbanUserAction.bind(null, person.id)}>
+                            <Button type="submit" size="sm" variant="outline">
+                              Unban
+                            </Button>
+                          </form>
+                        ) : (
+                          <form action={banUserAction.bind(null, person.id)}>
+                            <Button type="submit" size="sm" variant="destructive">
+                              Ban
+                            </Button>
+                          </form>
+                        )}
+                        <AdminDeleteUserDialog
+                          userId={person.id}
+                          username={person.username}
+                          email={person.email}
+                          postCount={person.postCount}
+                          replyCount={person.replyCount}
+                          onDeleted={setErased}
+                        />
+                      </div>
                     )}
                   </TableCell>
                 </TableRow>
