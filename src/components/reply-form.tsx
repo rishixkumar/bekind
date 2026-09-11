@@ -2,8 +2,8 @@
 
 import { useActionState } from "react";
 import { AnonymousToggle } from "@/components/anonymous-toggle";
+import { SmoothTextarea } from "@/components/smooth-textarea";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { REPLY_MAX } from "@/lib/constants";
 import type { ActionState } from "@/lib/validations";
 
@@ -23,11 +23,12 @@ export function ReplyForm({
   return (
     <form action={formAction} className="flex flex-col gap-3">
       {parentId ? <input type="hidden" name="parentId" value={parentId} /> : null}
-      <Textarea
+      <SmoothTextarea
         name="body"
         required
         maxLength={REPLY_MAX}
         placeholder={placeholder}
+        minRows={compact ? 3 : 4}
         className={compact ? "min-h-20" : "min-h-28"}
       />
       <AnonymousToggle label="Reply as Anonymous" />

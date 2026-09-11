@@ -9,7 +9,7 @@ import { ReplyForm } from "@/components/reply-form";
 import { UpvoteButton } from "@/components/upvote-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import { SmoothTextarea } from "@/components/smooth-textarea";
 
 function EditReplyForm({
   replyId,
@@ -21,7 +21,13 @@ function EditReplyForm({
   const action = updateReplyFormAction.bind(null, replyId);
   return (
     <form action={action} className="mt-2 flex flex-col gap-2">
-      <Textarea name="body" required defaultValue={defaultBody} className="min-h-20" />
+      <SmoothTextarea
+        name="body"
+        required
+        defaultValue={defaultBody}
+        minRows={3}
+        className="min-h-20"
+      />
       <Button type="submit" size="sm">
         Save
       </Button>
