@@ -7,7 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-export function VerifyForm({ email }: { email: string }) {
+export function VerifyForm({
+  email,
+  mailerConfigured,
+}: {
+  email: string;
+  mailerConfigured: boolean;
+}) {
   const [state, formAction, pending] = useActionState(
     verifyEmailAction,
     {} as ActionState,
@@ -15,11 +21,22 @@ export function VerifyForm({ email }: { email: string }) {
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
-      <p className="text-sm text-muted-foreground">
-        We sent a 6-digit code to{" "}
-        <span className="font-medium text-foreground">{email}</span>. Enter it
-        below to finish setting up your account.
-      </p>
+      {mailerConfigured ? (
+        <p className="text-sm text-muted-foreground">
+          We sent a 6-digit code to{" "}
+          <span className="font-medium text-foreground">{email}</span>. Enter it
+          below to finish setting up your account.
+        </p>
+      ) : (
+        <p className="text-sm text-muted-foreground">
+          A verification code was created for{" "}
+          <span className="font-medium text-foreground">{email}</span>, but
+          email delivery isn’t configured on this deployment yet — nothing was
+          emailed. Ask the site admin to set{" "}
+          <span className="font-medium text-foreground">RESEND_API_KEY</span>,
+          then tap “Send a new code”.
+        </p>
+      )}
 
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="code">Verification code</Label>

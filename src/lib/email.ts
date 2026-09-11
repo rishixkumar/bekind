@@ -2,10 +2,13 @@ import { SITE_NAME } from "@/lib/constants";
 
 /**
  * Resend's REST API, called directly so BK doesn't take on an SDK dependency
- * for one endpoint. Without RESEND_API_KEY there is no provider to fail, so the
- * mail goes to the server console instead — that keeps signup completable on a
- * preview deployment, where NODE_ENV is "production" but no key is configured.
- * Once a key exists this path is unreachable, so real codes never get logged.
+ * for one endpoint. Without RESEND_API_KEY:
+ * - Preview / local: print the message to the server console and treat as ok so
+ *   signup stays completable (VERCEL_ENV is not "production" on previews even
+ *   though NODE_ENV is).
+ * - Production: refuse to pretend a message was sent — callers surface an
+ *   admin-facing error instead of a fake "check your inbox".
+ * Once a key exists the console path is unreachable, so real codes never get logged.
  */
 const RESEND_ENDPOINT = "https://api.resend.com/emails";
 
@@ -24,10 +27,20 @@ export function isEmailConfigured() {
   return Boolean(process.env.RESEND_API_KEY?.trim());
 }
 
+const MAILER_NOT_CONFIGURED =
+  "Email delivery isn't configured yet. Ask the site admin to set RESEND_API_KEY.";
+
 export async function sendEmail({ to, subject, text }: Mail): Promise<SendResult> {
   const apiKey = process.env.RESEND_API_KEY?.trim();
 
   if (!apiKey) {
+    if (process.env.VERCEL_ENV === "production") {
+      console.error(
+        `[${SITE_NAME} email] RESEND_API_KEY is not set; refusing to claim a send in production.`,
+      );
+      return { ok: false, reason: MAILER_NOT_CONFIGURED };
+    }
+
     console.info(
       `\n[${SITE_NAME} email — printed to the console because RESEND_API_KEY is not set]\nTo: ${to}\nSubject: ${subject}\n\n${text}\n`,
     );
