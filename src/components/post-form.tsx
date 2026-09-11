@@ -2,10 +2,10 @@
 
 import { useActionState } from "react";
 import { AnonymousToggle } from "@/components/anonymous-toggle";
+import { SmoothTextarea } from "@/components/smooth-textarea";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { BODY_MAX, TITLE_MAX } from "@/lib/constants";
 import type { ActionState } from "@/lib/validations";
 
@@ -35,6 +35,7 @@ export function PostForm({
           maxLength={TITLE_MAX}
           defaultValue={defaultTitle}
           placeholder="What’s on your mind?"
+          className="smooth-compose-input h-11 px-3.5 text-base leading-snug tracking-[0.01em] transition-[border-color,box-shadow,background-color] duration-200 ease-out md:text-base"
         />
         {state.fieldErrors?.title ? (
           <p className="text-xs text-destructive">{state.fieldErrors.title}</p>
@@ -42,12 +43,13 @@ export function PostForm({
       </div>
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="body">Your thoughts</Label>
-        <Textarea
+        <SmoothTextarea
           id="body"
           name="body"
           required
           maxLength={BODY_MAX}
           defaultValue={defaultBody}
+          minRows={6}
           className="min-h-40"
           placeholder="Write it out. You can post as you, or anonymously."
         />
