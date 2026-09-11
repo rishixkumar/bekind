@@ -2,6 +2,7 @@
 
 import { hash } from "bcryptjs";
 import { AuthError } from "next-auth";
+import { headers } from "next/headers";
 import { eq, or } from "drizzle-orm";
 import { signIn, signOut } from "@/auth";
 import { getDb } from "@/db";
@@ -20,6 +21,37 @@ function safeInternalPath(value: string) {
 
 function isDefaultHome(path: string) {
   return path === "/" || path === "/login" || path === "/signup";
+}
+
+function decodeHeaderValue(value: string | null) {
+  if (!value) return null;
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
+/** Client IP from Vercel / proxy headers. Locally often missing. */
+function signupIpFromHeaders(h: Headers) {
+  const forwarded = h.get("x-forwarded-for");
+  if (forwarded) {
+    const first = forwarded.split(",")[0]?.trim();
+    if (first) return first;
+  }
+  return h.get("x-real-ip")?.trim() || null;
+}
+
+/**
+ * Approximate geo from Vercel edge headers only — no paid lookup.
+ * Falls back to "Unknown" when absent (typical in local `next dev`).
+ */
+function signupLocationFromHeaders(h: Headers) {
+  const city = decodeHeaderValue(h.get("x-vercel-ip-city"));
+  const region = decodeHeaderValue(h.get("x-vercel-ip-country-region"));
+  const country = decodeHeaderValue(h.get("x-vercel-ip-country"));
+  const parts = [city, region, country].filter(Boolean);
+  return parts.length > 0 ? parts.join(", ") : "Unknown";
 }
 
 export async function signUpAction(
@@ -60,6 +92,10 @@ export async function signUpAction(
     return { error: "That username is taken." };
   }
 
+  const requestHeaders = await headers();
+  const signupIp = signupIpFromHeaders(requestHeaders);
+  const signupLocation = signupLocationFromHeaders(requestHeaders);
+
   const passwordHash = await hash(parsed.data.password, 10);
   const admin = isAdminEmail(parsed.data.email);
   await db.insert(users).values({
@@ -70,6 +106,8 @@ export async function signUpAction(
     lastLoginAt: new Date(),
     // GT-format email is enough for now; no mailbox code step.
     emailVerifiedAt: new Date(),
+    signupIp,
+    signupLocation,
   });
 
   try {
