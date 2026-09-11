@@ -1,7 +1,8 @@
+import type { Metadata } from "next";
 import { UserLocationMap } from "@/components/user-location-map";
 import { SITE_NAME } from "@/lib/constants";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: `Map · ${SITE_NAME}`,
   description: "See where you are on the map.",
 };

@@ -24,6 +24,12 @@ type GeoState =
   | { status: "error"; message: string }
   | { status: "ready"; lat: number; lng: number };
 
+const GEO_OPTIONS: PositionOptions = {
+  enableHighAccuracy: true,
+  timeout: 15000,
+  maximumAge: 60_000,
+};
+
 function StatusPanel({
   title,
   body,
@@ -47,10 +53,55 @@ function StatusPanel({
   );
 }
 
+function applyGeoError(error: GeolocationPositionError): GeoState {
+  if (error.code === error.PERMISSION_DENIED) {
+    return { status: "denied" };
+  }
+  return {
+    status: "error",
+    message: error.message || "Could not read your location.",
+  };
+}
+
 export function UserLocationMap() {
   const [state, setState] = useState<GeoState>({ status: "loading" });
 
-  const requestLocation = useCallback(() => {
+  useEffect(() => {
+    let cancelled = false;
+
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
+      // Defer so we don't setState synchronously in the effect body.
+      const id = window.setTimeout(() => {
+        if (!cancelled) setState({ status: "unsupported" });
+      }, 0);
+      return () => {
+        cancelled = true;
+        window.clearTimeout(id);
+      };
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        if (cancelled) return;
+        setState({
+          status: "ready",
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        });
+      },
+      (error) => {
+        if (cancelled) return;
+        setState(applyGeoError(error));
+      },
+      GEO_OPTIONS,
+    );
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const retryLocation = useCallback(() => {
     setState({ status: "loading" });
 
     if (typeof navigator === "undefined" || !navigator.geolocation) {
@@ -67,26 +118,11 @@ export function UserLocationMap() {
         });
       },
       (error) => {
-        if (error.code === error.PERMISSION_DENIED) {
-          setState({ status: "denied" });
-          return;
-        }
-        setState({
-          status: "error",
-          message: error.message || "Could not read your location.",
-        });
+        setState(applyGeoError(error));
       },
-      {
-        enableHighAccuracy: true,
-        timeout: 15000,
-        maximumAge: 60_000,
-      },
+      GEO_OPTIONS,
     );
   }, []);
-
-  useEffect(() => {
-    requestLocation();
-  }, [requestLocation]);
 
   if (state.status === "loading") {
     return (
@@ -112,7 +148,7 @@ export function UserLocationMap() {
         title="Location permission needed"
         body="BK needs location access to show where you are. Enable it in your browser settings, then try again."
         action={
-          <Button type="button" onClick={requestLocation}>
+          <Button type="button" onClick={retryLocation}>
             Try again
           </Button>
         }
@@ -126,7 +162,7 @@ export function UserLocationMap() {
         title="Couldn’t get your location"
         body={state.message}
         action={
-          <Button type="button" onClick={requestLocation}>
+          <Button type="button" onClick={retryLocation}>
             Try again
           </Button>
         }
