@@ -40,8 +40,8 @@ export function SiteEntrance({ children }: { children: React.ReactNode }) {
     const fromCookie = readEnterCookie();
     if (!fromQuery && !fromCookie && !pendingEntrance) return;
 
+    // `play` is already true here: the initializer above tests the same condition.
     pendingEntrance = true;
-    setPlay(true);
     clearEnterCookie();
     if (fromQuery) {
       router.replace(pathname, { scroll: false });
