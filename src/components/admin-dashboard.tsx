@@ -96,7 +96,7 @@ export function AdminDashboard({
   return (
     <div className="flex flex-col gap-6 overflow-x-auto">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-gt-navy">Admin</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">Admin</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Users, logins, reports, and the real author behind anonymous posts.
         </p>
@@ -352,7 +352,7 @@ function StatCard({ label, value }: { label: string; value: number }) {
         <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
           {label}
         </div>
-        <div className="text-2xl font-bold text-gt-navy">{value}</div>
+        <div className="text-2xl font-bold text-foreground">{value}</div>
       </CardContent>
     </Card>
   );

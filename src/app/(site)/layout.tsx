@@ -1,7 +1,9 @@
+import { Suspense } from "react";
+import { SiteEntrance } from "@/components/site-entrance";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 
-export default function SiteLayout({ children }: LayoutProps<"/">) {
+function SiteChrome({ children }: { children: React.ReactNode }) {
   return (
     <>
       <SiteHeader />
@@ -10,5 +12,15 @@ export default function SiteLayout({ children }: LayoutProps<"/">) {
       </main>
       <SiteFooter />
     </>
+  );
+}
+
+export default function SiteLayout({ children }: LayoutProps<"/">) {
+  return (
+    <Suspense fallback={<SiteChrome>{children}</SiteChrome>}>
+      <SiteEntrance>
+        <SiteChrome>{children}</SiteChrome>
+      </SiteEntrance>
+    </Suspense>
   );
 }

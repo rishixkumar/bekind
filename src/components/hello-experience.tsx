@@ -7,26 +7,6 @@ import { enterRoomAction } from "@/lib/actions/hello";
 import { SITE_NAME } from "@/lib/constants";
 import "@/app/hello/hello.css";
 
-function Title({
-  children,
-  id,
-}: {
-  children: string;
-  id: string;
-}) {
-  const lines = children.split("\n");
-  return (
-    <h2 id={id} className="hello-title" data-reveal>
-      {lines.map((line, index) => (
-        <span key={line} className="hello-title-line">
-          {line}
-          {index < lines.length - 1 ? <br /> : null}
-        </span>
-      ))}
-    </h2>
-  );
-}
-
 function SkipButton() {
   const { pending } = useFormStatus();
   return (
@@ -69,15 +49,17 @@ export function HelloExperience() {
       });
       return;
     }
+    // Require a meaningful share of the element in-view before reveal so
+    // lower sections stay hidden when you only glance past the hero fold.
     const io = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
-          if (!entry.isIntersecting) continue;
+          if (!entry.isIntersecting || entry.intersectionRatio < 0.22) continue;
           (entry.target as HTMLElement).dataset.in = "";
           io.unobserve(entry.target);
         }
       },
-      { threshold: 0.18, rootMargin: "0px 0px -10% 0px" },
+      { threshold: [0, 0.22, 0.4], rootMargin: "0px 0px -18% 0px" },
     );
     nodes.forEach((el) => io.observe(el));
     return () => io.disconnect();
@@ -133,10 +115,6 @@ export function HelloExperience() {
           <h1 id="hello-welcome-title" className="hello-title" data-hero>
             Welcome to BK
           </h1>
-          <p className="hello-body" data-hero>
-            Not a program. Not a pitch. A room for Tech students who need to say
-            the thing out loud.
-          </p>
         </div>
         <button
           ref={cueRef}
@@ -166,12 +144,18 @@ export function HelloExperience() {
       >
         <div className="hello-copy">
           <p className="hello-kicker" data-reveal>
-            Campus
+            About
           </p>
-          <Title id="hello-campus-title">{"Packed halls.\nQuiet anyway."}</Title>
+          <h2 id="hello-campus-title" className="hello-title" data-reveal>
+            What is BK?
+          </h2>
           <p className="hello-body" data-reveal style={{ "--d": "120ms" } as React.CSSProperties}>
-            A 200-person lecture. The hill at noon. Still nobody in it with you.
-            That’s a Tuesday.
+            A place to talk about what’s going on on campus — the stuff that
+            sits with you after class, or never quite makes it out at lunch.
+          </p>
+          <p className="hello-body" data-reveal style={{ "--d": "200ms" } as React.CSSProperties}>
+            If you’re shy, if you’d rather not start it in person, if
+            performing isn’t your thing: this is for that.
           </p>
         </div>
       </section>
@@ -185,18 +169,9 @@ export function HelloExperience() {
             Talk without the side-eye.
           </h2>
           <p className="hello-body" data-reveal style={{ "--d": "120ms" } as React.CSSProperties}>
-            Put words down without performing. Read. Reply. Or lurk. Nobody here
-            needs you to be impressive.
+            Put words down without performing. Read, reply, or lurk — nobody
+            here needs you to be impressive.
           </p>
-        </div>
-      </section>
-
-      <section className="hello-block" aria-labelledby="hello-how-title">
-        <div className="hello-copy">
-          <p className="hello-kicker" data-reveal>
-            How it works
-          </p>
-          <Title id="hello-how-title">{"Public feed.\nOptional name."}</Title>
           <ul className="hello-points">
             <li data-reveal style={{ "--d": "40ms" } as React.CSSProperties}>
               Anyone can read the room

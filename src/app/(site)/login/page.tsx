@@ -19,7 +19,7 @@ export default async function LoginPage({
   return (
     <Card className="mx-auto w-full max-w-md border-border shadow-sm">
       <CardHeader>
-        <CardTitle className="text-2xl font-bold text-gt-navy">
+        <CardTitle className="text-2xl font-bold text-foreground">
           Log in to {SITE_NAME}
         </CardTitle>
       </CardHeader>
@@ -27,13 +27,13 @@ export default async function LoginPage({
         <LoginForm next={nextPath} />
         <p className="text-center text-sm text-muted-foreground">
           New here?{" "}
-          <Link href="/signup" className="font-medium text-gt-navy underline-offset-2 hover:underline">
+          <Link href="/signup" className="font-medium text-foreground underline-offset-2 hover:underline">
             Create an account
           </Link>
         </p>
         <p className="text-center text-sm text-muted-foreground">
           Or{" "}
-          <Link href="/" className="font-medium text-gt-navy underline-offset-2 hover:underline">
+          <Link href="/" className="font-medium text-foreground underline-offset-2 hover:underline">
             read the room
           </Link>{" "}
           without an account.

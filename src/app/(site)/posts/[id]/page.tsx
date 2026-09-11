@@ -51,7 +51,7 @@ export default async function PostPage({
           <span>· {formatTimeAgo(post.createdAt)}</span>
           {wasEdited(post.createdAt, post.updatedAt) ? <span>· edited</span> : null}
         </div>
-        <h1 className="mt-3 text-2xl font-bold tracking-tight text-gt-navy">{post.title}</h1>
+        <h1 className="mt-3 text-2xl font-bold tracking-tight text-foreground">{post.title}</h1>
         <p className="mt-3 whitespace-pre-wrap text-base leading-relaxed">{post.body}</p>
         <div className="mt-4 flex flex-wrap items-center gap-1">
           <UpvoteButton
@@ -96,7 +96,7 @@ export default async function PostPage({
       </div>
 
       <section className="flex flex-col gap-4">
-        <h2 className="text-lg font-bold text-gt-navy">
+        <h2 className="text-lg font-bold text-foreground">
           Replies{" "}
           <span className="font-medium text-muted-foreground">({post.replyCount})</span>
         </h2>
@@ -108,7 +108,7 @@ export default async function PostPage({
           <p className="text-sm text-muted-foreground">{bannedMessage()}</p>
         ) : (
           <p className="text-sm text-muted-foreground">
-            <Link href={loginHref} className="font-medium text-gt-navy underline-offset-2 hover:underline">
+            <Link href={loginHref} className="font-medium text-foreground underline-offset-2 hover:underline">
               Log in
             </Link>{" "}
             to reply.

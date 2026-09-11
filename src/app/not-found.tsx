@@ -9,7 +9,7 @@ export default function NotFound() {
     <>
       <SiteHeader />
       <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-4 py-16 text-center">
-        <h1 className="text-2xl font-bold text-gt-navy">That’s gone</h1>
+        <h1 className="text-2xl font-bold text-foreground">That’s gone</h1>
         <p className="mt-2 text-sm text-muted-foreground">
           This page isn’t here, or it was hidden.
         </p>

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Roboto } from "next/font/google";
+import { ThemeProvider } from "@/components/theme-provider";
 import { SITE_NAME } from "@/lib/constants";
 import "./globals.css";
 
@@ -17,14 +18,21 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#003057",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#003057" },
+    { media: "(prefers-color-scheme: dark)", color: "#001526" },
+  ],
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${roboto.variable} ${roboto.className} h-full antialiased`}>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${roboto.variable} ${roboto.className} h-full antialiased`}
+    >
       <body className="flex min-h-full flex-col bg-background font-sans text-foreground">
-        {children}
+        <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
   );

@@ -12,7 +12,7 @@ export default async function SignupPage() {
   return (
     <Card className="mx-auto w-full max-w-md border-border shadow-sm">
       <CardHeader>
-        <CardTitle className="text-2xl font-bold text-gt-navy">
+        <CardTitle className="text-2xl font-bold text-foreground">
           Join {SITE_NAME}
         </CardTitle>
       </CardHeader>
@@ -23,13 +23,13 @@ export default async function SignupPage() {
         <SignupForm />
         <p className="text-center text-sm text-muted-foreground">
           Already have an account?{" "}
-          <Link href="/login" className="font-medium text-gt-navy underline-offset-2 hover:underline">
+          <Link href="/login" className="font-medium text-foreground underline-offset-2 hover:underline">
             Log in
           </Link>
         </p>
         <p className="text-center text-sm text-muted-foreground">
           Or{" "}
-          <Link href="/" className="font-medium text-gt-navy underline-offset-2 hover:underline">
+          <Link href="/" className="font-medium text-foreground underline-offset-2 hover:underline">
             read the room
           </Link>{" "}
           without an account.

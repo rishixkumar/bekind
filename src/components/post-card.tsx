@@ -33,7 +33,7 @@ export function PostCard({
           <span>· {formatTimeAgo(post.createdAt)}</span>
         </div>
         <Link href={`/posts/${post.id}`} className="group">
-          <h2 className="text-lg font-bold leading-snug text-gt-navy group-hover:underline">
+          <h2 className="text-lg font-bold leading-snug text-foreground group-hover:underline">
             {post.title}
           </h2>
           <p className="mt-1 text-sm leading-relaxed text-muted-foreground">

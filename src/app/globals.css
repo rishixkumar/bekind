@@ -12,6 +12,8 @@
   --font-heading: "Roboto", "Roboto Fallback", ui-sans-serif, system-ui, sans-serif;
   --color-gt-navy: var(--gt-navy);
   --color-gt-gold: var(--gt-gold);
+  --color-header: var(--header);
+  --color-header-foreground: var(--header-foreground);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -51,15 +53,17 @@
 }
 
 :root {
-  /* Official GT web colors: Navy #003057, Tech Gold #B3A369, White */
+  /* Brand constants — GT Navy + Tech Gold in both modes */
   --gt-navy: #003057;
   --gt-gold: #b3a369;
+
+  /* Light: off-white surfaces, navy ink, gold accents */
   --background: #f6f8fa;
-  --foreground: #1c2e3a;
+  --foreground: #003057;
   --card: #ffffff;
-  --card-foreground: #1c2e3a;
+  --card-foreground: #003057;
   --popover: #ffffff;
-  --popover-foreground: #1c2e3a;
+  --popover-foreground: #003057;
   --primary: #b3a369;
   --primary-foreground: #003057;
   --secondary: #e8eef3;
@@ -72,6 +76,8 @@
   --border: #d5dce3;
   --input: #d5dce3;
   --ring: #b3a369;
+  --header: #003057;
+  --header-foreground: #ffffff;
   --chart-1: #003057;
   --chart-2: #b3a369;
   --chart-3: #4a5c6a;
@@ -88,9 +94,47 @@
   --sidebar-ring: #b3a369;
 }
 
+.dark {
+  /* Dark: deep navy surfaces, light ink, gold accents */
+  --background: #000d1a;
+  --foreground: #e8eef3;
+  --card: #001a2e;
+  --card-foreground: #e8eef3;
+  --popover: #001a2e;
+  --popover-foreground: #e8eef3;
+  --primary: #b3a369;
+  --primary-foreground: #003057;
+  --secondary: #0a3050;
+  --secondary-foreground: #e8eef3;
+  --muted: #0a2840;
+  --muted-foreground: #9aafbf;
+  --accent: #0a3050;
+  --accent-foreground: #e8eef3;
+  --destructive: #f97066;
+  --border: #1a3a55;
+  --input: #1a3a55;
+  --ring: #b3a369;
+  --header: #001526;
+  --header-foreground: #f4f1e8;
+  --chart-1: #7eb6d9;
+  --chart-2: #b3a369;
+  --chart-3: #9aafbf;
+  --chart-4: #6b7c89;
+  --chart-5: #1a3a55;
+  --sidebar: #001526;
+  --sidebar-foreground: #f4f1e8;
+  --sidebar-primary: #b3a369;
+  --sidebar-primary-foreground: #003057;
+  --sidebar-accent: #0a3050;
+  --sidebar-accent-foreground: #f4f1e8;
+  --sidebar-border: #0a3050;
+  --sidebar-ring: #b3a369;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    transition: background-color 200ms ease, color 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
   }
   body {
     @apply bg-background text-foreground;
@@ -104,6 +148,51 @@
     @apply font-heading tracking-tight text-foreground;
   }
   a:not([class]) {
-    @apply text-gt-navy underline-offset-2 hover:text-gt-navy/80 hover:underline;
+    @apply text-foreground underline-offset-2 hover:text-foreground/80 hover:underline;
+  }
+}
+
+/* Hello → feed one-shot entrance */
+.site-shell[data-from-hello] > :not(.site-enter-wash) {
+  animation: site-enter-rise 520ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.site-enter-wash {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: color-mix(in srgb, var(--gt-navy) 92%, black);
+  animation: site-enter-wash 480ms ease forwards;
+}
+
+@keyframes site-enter-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes site-enter-wash {
+  from {
+    opacity: 0.88;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-shell[data-from-hello] > :not(.site-enter-wash),
+  .site-enter-wash {
+    animation: none !important;
+  }
+
+  .site-enter-wash {
+    display: none;
   }
 }
