@@ -12,7 +12,7 @@ import {
   restoreReplyAsAdmin,
   unbanUserAction,
 } from "@/lib/actions/admin";
-import { formatTimeAgo } from "@/lib/format";
+import { formatExactDateTime, formatTimeAgo } from "@/lib/format";
 import type { DeleteUserTally } from "@/lib/validations";
 import { AdminDeleteUserDialog } from "@/components/admin-delete-user-dialog";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -45,6 +45,8 @@ type AdminUser = {
   lastLoginAt: Date | null;
   bannedAt: Date | null;
   createdAt: Date;
+  signupIp: string | null;
+  signupLocation: string | null;
   postCount: number;
   replyCount: number;
 };
@@ -209,7 +211,9 @@ export function AdminDashboard({
               <TableRow>
                 <TableHead>User</TableHead>
                 <TableHead>Last login</TableHead>
-                <TableHead>Joined</TableHead>
+                <TableHead>Signed up</TableHead>
+                <TableHead>IP</TableHead>
+                <TableHead>Location</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead />
               </TableRow>
@@ -229,7 +233,20 @@ export function AdminDashboard({
                   <TableCell>
                     {person.lastLoginAt ? formatTimeAgo(person.lastLoginAt) : "Never"}
                   </TableCell>
-                  <TableCell>{formatTimeAgo(person.createdAt)}</TableCell>
+                  <TableCell>
+                    <div className="whitespace-nowrap text-sm text-foreground">
+                      {formatExactDateTime(person.createdAt)}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {formatTimeAgo(person.createdAt)}
+                    </div>
+                  </TableCell>
+                  <TableCell className="font-mono text-xs text-foreground">
+                    {person.signupIp ?? "—"}
+                  </TableCell>
+                  <TableCell className="text-sm text-foreground">
+                    {person.signupLocation ?? "Unknown"}
+                  </TableCell>
                   <TableCell>
                     {person.bannedAt ? (
                       <Badge variant="destructive">banned</Badge>

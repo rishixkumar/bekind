@@ -27,6 +27,10 @@ export const users = pgTable("users", {
   // Nullable with no default: the deployed main branch neither selects nor
   // sets this, so adding it leaves production working.
   emailVerifiedAt: timestamp("email_verified_at", { withTimezone: true }),
+  // Admin signup logging — nullable adds only; `npm run db:push` is safe on
+  // the shared prod DB because existing rows stay null and old code ignores them.
+  signupIp: text("signup_ip"),
+  signupLocation: text("signup_location"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),

@@ -18,7 +18,9 @@ npm run db:push
 npm run dev
 ```
 
-The account that signs up with `ADMIN_EMAIL` can open `/admin` (users, logins, reports, hide/restore, bans).
+`npm run db:push` applies Drizzle schema to the shared Neon database. Additive nullable columns (e.g. `users.signup_ip`, `users.signup_location`) are safe: existing rows stay null and older deploys that ignore the columns keep working. Do not use push to drop or rename columns on this DB.
+
+The account that signs up with `ADMIN_EMAIL` can open `/admin` (users, logins, reports, hide/restore, bans). Signup IP and approximate geo (from Vercel headers) are stored for duplicate/logging checks and shown only on `/admin`.
 
 `RESEND_API_KEY` is optional and unused for signup right now (kept for a future mailer).
 
@@ -62,7 +64,7 @@ One Next.js App Router app (not a separate Express API). Pages, Server Actions, 
 
 **Tables** (`src/db/schema.ts`)
 
-- `users` — email, username, password hash, role, `lastLoginAt`, `bannedAt`, `emailVerifiedAt`
+- `users` — email, username, password hash, role, `lastLoginAt`, `bannedAt`, `emailVerifiedAt`, `signupIp`, `signupLocation`
 - `email_verification_tokens` — legacy; unused by the app path today
 - `posts` — title, body, `isAnonymous`, `hiddenAt` / `hiddenBy`
 - `replies` — nested via `parentId`, same anonymous + hide fields
@@ -150,7 +152,7 @@ flowchart TD
 
 **Write:** Client form → Server Action → `requireActiveUser` (must be logged in and not banned) → Zod parse → Drizzle insert/update → `revalidatePath`. Banned users can still read; posting is paused.
 
-**Auth:** Signup validates the GT address pattern, hashes the password with bcrypt, inserts into `users` with `emailVerifiedAt` set (admin role if the email is `ADMIN_EMAIL`), then signs in and lands on `/`. Login goes through Auth.js credentials, compares the hash, updates `lastLoginAt`, and issues a JWT session.
+**Auth:** Signup validates the GT address pattern, hashes the password with bcrypt, inserts into `users` with `emailVerifiedAt` set (admin role if the email is `ADMIN_EMAIL`), records `signupIp` / `signupLocation` from request headers when available, then signs in and lands on `/`. Login goes through Auth.js credentials, compares the hash, updates `lastLoginAt`, and issues a JWT session.
 
 **Anonymous:** `isAnonymous` is a flag on the post/reply row. Author id is always stored. Public pages render “Anonymous”; the author sees “Anonymous · you”; admin pages and `displayName(..., isAdmin)` show the real username.
 
