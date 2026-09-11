@@ -20,7 +20,7 @@ npm run dev
 
 The account that signs up with `ADMIN_EMAIL` can open `/admin` (users, logins, reports, hide/restore, bans).
 
-`RESEND_API_KEY` is optional in development — without it, verification codes are printed to the server console instead of emailed. Production needs a real key or signup can't complete.
+`RESEND_API_KEY` is optional. Without it, no mail goes out and verification codes are printed to the server console instead — your terminal under `npm run dev`, or the runtime logs of a deployment. That keeps signup completable on a preview deploy without a mail provider; set a real key for anything user-facing.
 
 ## Georgia Tech accounts
 

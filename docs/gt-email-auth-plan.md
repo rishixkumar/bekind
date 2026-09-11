@@ -98,8 +98,9 @@ revisiting after the first real users hit the form.
 - [x] Codes: 6 digits, stored as a SHA-256 hash, 15-minute expiry, single use,
       max 5 wrong guesses, previous codes invalidated on resend
 - [x] Delivery: Resend via REST (`RESEND_API_KEY`, no new dependency). Without a
-      key, dev logs the code to the server console; production refuses rather
-      than silently dropping the mail
+      key there is no provider to fail, so the code goes to the server console
+      instead — that keeps signup completable on a preview deploy, where
+      `NODE_ENV` is "production" but no key is configured
 - [x] Resend rate limit: 60s cooldown, 5 per hour per account
 - [x] Write gating in `requireActiveUser()` — posts, replies, votes, reports.
       Reading, login, and signup stay open. Admins bypass

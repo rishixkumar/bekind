@@ -2,9 +2,10 @@ import { SITE_NAME } from "@/lib/constants";
 
 /**
  * Resend's REST API, called directly so BK doesn't take on an SDK dependency
- * for one endpoint. Without RESEND_API_KEY, development prints the mail to the
- * server console and production refuses — better a visible failure than a
- * verification code that silently never arrives.
+ * for one endpoint. Without RESEND_API_KEY there is no provider to fail, so the
+ * mail goes to the server console instead — that keeps signup completable on a
+ * preview deployment, where NODE_ENV is "production" but no key is configured.
+ * Once a key exists this path is unreachable, so real codes never get logged.
  */
 const RESEND_ENDPOINT = "https://api.resend.com/emails";
 
@@ -27,11 +28,8 @@ export async function sendEmail({ to, subject, text }: Mail): Promise<SendResult
   const apiKey = process.env.RESEND_API_KEY?.trim();
 
   if (!apiKey) {
-    if (process.env.NODE_ENV === "production") {
-      return { ok: false, reason: "RESEND_API_KEY is not set." };
-    }
     console.info(
-      `\n[${SITE_NAME} email — dev only, no RESEND_API_KEY set]\nTo: ${to}\nSubject: ${subject}\n\n${text}\n`,
+      `\n[${SITE_NAME} email — printed to the console because RESEND_API_KEY is not set]\nTo: ${to}\nSubject: ${subject}\n\n${text}\n`,
     );
     return { ok: true };
   }
