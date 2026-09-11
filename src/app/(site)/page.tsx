@@ -10,10 +10,24 @@ export const dynamic = "force-dynamic";
 export default async function HomePage() {
   const user = await getAppUser();
   const posts = await getFeedPosts(user);
-  const composeHref = user ? "/posts/new" : "/login?next=/posts/new";
+  const composeHref = user
+    ? user.isVerified
+      ? "/posts/new"
+      : "/verify"
+    : "/login?next=/posts/new";
 
   return (
     <div className="flex flex-col gap-5">
+      {user && !user.isVerified ? (
+        <div className="rounded-md border border-gt-gold bg-gt-gold/10 px-4 py-3 text-sm">
+          <span className="font-medium">One more step.</span>{" "}
+          <Link href="/verify" className="underline underline-offset-2">
+            Confirm your Georgia Tech email
+          </Link>{" "}
+          to post, reply, and upvote. Reading is open either way.
+        </div>
+      ) : null}
+
       <div className="flex items-end justify-between gap-3">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">The room</h1>

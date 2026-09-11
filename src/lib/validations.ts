@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { BODY_MAX, DETAILS_MAX, REPLY_MAX, REPORT_REASONS, TITLE_MAX } from "./constants";
+import { GT_EMAIL_REJECTION, isAllowedSignupEmail } from "./gt-email";
 
 const emailField = z
   .string()
@@ -8,8 +9,11 @@ const emailField = z
   .min(1, "Email is required")
   .refine((value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value), "Enter a valid email");
 
+/** Login stays lenient so pre-existing accounts can always still sign in. */
+const gtEmailField = emailField.refine(isAllowedSignupEmail, GT_EMAIL_REJECTION);
+
 export const signUpSchema = z.object({
-  email: emailField,
+  email: gtEmailField,
   username: z
     .string()
     .trim()
@@ -46,6 +50,14 @@ export const replySchema = z.object({
     .max(REPLY_MAX, `Keep it under ${REPLY_MAX} characters`),
   isAnonymous: z.boolean(),
   parentId: z.string().uuid().optional().nullable(),
+});
+
+export const verifyCodeSchema = z.object({
+  code: z
+    .string()
+    .trim()
+    .transform((value) => value.replace(/\D/g, ""))
+    .refine((value) => value.length === 6, "Enter the 6-digit code from your email"),
 });
 
 export const reportSchema = z.object({

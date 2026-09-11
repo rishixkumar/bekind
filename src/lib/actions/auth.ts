@@ -7,6 +7,7 @@ import { signIn, signOut } from "@/auth";
 import { getDb } from "@/db";
 import { users } from "@/db/schema";
 import { isAdminEmail } from "@/lib/constants";
+import { issueVerificationCode } from "@/lib/verification";
 import { loginSchema, signUpSchema, type ActionState } from "@/lib/validations";
 
 function formString(formData: FormData, key: string) {
@@ -62,19 +63,32 @@ export async function signUpAction(
 
   const passwordHash = await hash(parsed.data.password, 10);
   const admin = isAdminEmail(parsed.data.email);
-  await db.insert(users).values({
-    email: parsed.data.email,
-    username: parsed.data.username,
-    passwordHash,
-    role: admin ? "admin" : "user",
-    lastLoginAt: new Date(),
-  });
+  const [created] = await db
+    .insert(users)
+    .values({
+      email: parsed.data.email,
+      username: parsed.data.username,
+      passwordHash,
+      role: admin ? "admin" : "user",
+      lastLoginAt: new Date(),
+      // The operator has nothing to prove; everyone else confirms their mailbox.
+      emailVerifiedAt: admin ? new Date() : null,
+    })
+    .returning({ id: users.id });
+
+  if (!admin) {
+    // A failed send isn't fatal: sign-in still happens and /verify offers a
+    // resend that surfaces the real reason.
+    await issueVerificationCode(created.id, parsed.data.email, {
+      enforceRateLimit: false,
+    });
+  }
 
   try {
     await signIn("credentials", {
       email: parsed.data.email,
       password: parsed.data.password,
-      redirectTo: admin ? "/admin" : "/",
+      redirectTo: admin ? "/admin" : "/verify",
     });
   } catch (error) {
     if (error instanceof AuthError) {

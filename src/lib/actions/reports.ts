@@ -4,7 +4,7 @@ import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getDb } from "@/db";
 import { posts, replies, reports } from "@/db/schema";
-import { bannedMessage, requireActiveUser } from "@/lib/session";
+import { requireActiveUser, writeGateMessage } from "@/lib/session";
 import { reportSchema, type ActionState } from "@/lib/validations";
 
 export async function reportContentAction(
@@ -17,9 +17,8 @@ export async function reportContentAction(
   try {
     user = await requireActiveUser();
   } catch (error) {
-    if (error instanceof Error && error.message === "BANNED") {
-      return { error: bannedMessage() };
-    }
+    const message = writeGateMessage(error);
+    if (message) return { error: message };
     throw error;
   }
 

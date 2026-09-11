@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { signUpAction } from "@/lib/actions/auth";
 import { SITE_NAME } from "@/lib/constants";
+import { GT_EMAIL_HINT } from "@/lib/gt-email";
 import type { ActionState } from "@/lib/validations";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,11 +15,20 @@ export function SignupForm() {
   return (
     <form action={formAction} className="flex flex-col gap-4">
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="email">Email</Label>
-        <Input id="email" name="email" type="email" autoComplete="email" required />
+        <Label htmlFor="email">Georgia Tech email</Label>
+        <Input
+          id="email"
+          name="email"
+          type="email"
+          autoComplete="email"
+          placeholder="gburdell3@gatech.edu"
+          required
+        />
         {state.fieldErrors?.email ? (
           <p className="text-xs text-destructive">{state.fieldErrors.email}</p>
-        ) : null}
+        ) : (
+          <p className="text-xs text-muted-foreground">{GT_EMAIL_HINT}</p>
+        )}
       </div>
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="username">Username</Label>

@@ -4,16 +4,14 @@ import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getDb } from "@/db";
 import { posts, replies, votes } from "@/db/schema";
-import { requireActiveUser } from "@/lib/session";
+import { requireActiveUser, writeGateMessage } from "@/lib/session";
 
 export async function togglePostVote(postId: string) {
   let user;
   try {
     user = await requireActiveUser();
   } catch (error) {
-    if (error instanceof Error && error.message === "BANNED") {
-      return;
-    }
+    if (writeGateMessage(error)) return;
     throw error;
   }
 
@@ -43,9 +41,7 @@ export async function toggleReplyVote(replyId: string) {
   try {
     user = await requireActiveUser();
   } catch (error) {
-    if (error instanceof Error && error.message === "BANNED") {
-      return;
-    }
+    if (writeGateMessage(error)) return;
     throw error;
   }
 

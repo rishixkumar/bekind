@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getDb } from "@/db";
 import { posts, replies } from "@/db/schema";
-import { bannedMessage, requireActiveUser, requireUser } from "@/lib/session";
+import { requireActiveUser, requireUser, writeGateMessage } from "@/lib/session";
 import { replySchema, type ActionState } from "@/lib/validations";
 
 function readAnonymous(formData: FormData) {
@@ -20,9 +20,8 @@ export async function createReplyAction(
   try {
     user = await requireActiveUser();
   } catch (error) {
-    if (error instanceof Error && error.message === "BANNED") {
-      return { error: bannedMessage() };
-    }
+    const message = writeGateMessage(error);
+    if (message) return { error: message };
     throw error;
   }
 
@@ -74,9 +73,8 @@ export async function updateReplyAction(
   try {
     user = await requireActiveUser();
   } catch (error) {
-    if (error instanceof Error && error.message === "BANNED") {
-      return { error: bannedMessage() };
-    }
+    const message = writeGateMessage(error);
+    if (message) return { error: message };
     throw error;
   }
 

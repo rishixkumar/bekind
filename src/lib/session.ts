@@ -11,6 +11,7 @@ export type AppUser = {
   username: string;
   isAdmin: boolean;
   isBanned: boolean;
+  isVerified: boolean;
 };
 
 export async function getAppUser(): Promise<AppUser | null> {
@@ -26,12 +27,16 @@ export async function getAppUser(): Promise<AppUser | null> {
 
   if (!row) return null;
 
+  const isAdmin = row.role === "admin" || isAdminEmail(row.email);
+
   return {
     id: row.id,
     email: row.email,
     username: row.username,
-    isAdmin: row.role === "admin" || isAdminEmail(row.email),
+    isAdmin,
     isBanned: Boolean(row.bannedAt),
+    // Admins are never gated, so a non-GT ADMIN_EMAIL can still moderate.
+    isVerified: isAdmin || Boolean(row.emailVerifiedAt),
   };
 }
 
@@ -46,7 +51,21 @@ export async function requireActiveUser() {
   if (user.isBanned) {
     throw new Error("BANNED");
   }
+  if (!user.isVerified) {
+    throw new Error("UNVERIFIED");
+  }
   return user;
+}
+
+/**
+ * Write actions all funnel through requireActiveUser; this turns the thrown
+ * gate into copy for the form, and rethrows anything it doesn't own.
+ */
+export function writeGateMessage(error: unknown): string | null {
+  if (!(error instanceof Error)) return null;
+  if (error.message === "BANNED") return bannedMessage();
+  if (error.message === "UNVERIFIED") return unverifiedMessage();
+  return null;
 }
 
 export async function requireAdmin() {
@@ -57,4 +76,8 @@ export async function requireAdmin() {
 
 export function bannedMessage() {
   return `Your account can still read ${SITE_NAME}, but posting is paused.`;
+}
+
+export function unverifiedMessage() {
+  return "Confirm your Georgia Tech email before posting — check your inbox for the code.";
 }

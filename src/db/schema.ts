@@ -3,6 +3,7 @@ import {
   type AnyPgColumn,
   boolean,
   index,
+  integer,
   pgEnum,
   pgTable,
   text,
@@ -23,10 +24,35 @@ export const users = pgTable("users", {
   role: userRoleEnum("role").notNull().default("user"),
   lastLoginAt: timestamp("last_login_at", { withTimezone: true }),
   bannedAt: timestamp("banned_at", { withTimezone: true }),
+  // Nullable with no default: the deployed main branch neither selects nor
+  // sets this, so adding it leaves production working.
+  emailVerifiedAt: timestamp("email_verified_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
 });
+
+export const emailVerificationTokens = pgTable(
+  "email_verification_tokens",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    /** SHA-256 of the 6-digit code; the code itself only exists in the email. */
+    codeHash: text("code_hash").notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    consumedAt: timestamp("consumed_at", { withTimezone: true }),
+    attempts: integer("attempts").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    index("email_verification_tokens_user_id_idx").on(t.userId),
+    index("email_verification_tokens_created_at_idx").on(t.createdAt),
+  ],
+);
 
 export const posts = pgTable(
   "posts",
@@ -129,7 +155,18 @@ export const usersRelations = relations(users, ({ many }) => ({
   replies: many(replies),
   votes: many(votes),
   reports: many(reports),
+  emailVerificationTokens: many(emailVerificationTokens),
 }));
+
+export const emailVerificationTokensRelations = relations(
+  emailVerificationTokens,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [emailVerificationTokens.userId],
+      references: [users.id],
+    }),
+  }),
+);
 
 export const postsRelations = relations(posts, ({ one, many }) => ({
   author: one(users, { fields: [posts.authorId], references: [users.id] }),
