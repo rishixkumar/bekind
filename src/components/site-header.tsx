@@ -21,6 +21,14 @@ export async function SiteHeader() {
           <span className="text-lg font-bold tracking-wide">{SITE_NAME}</span>
         </Link>
         <nav className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-header-foreground hover:bg-white/10 hover:text-header-foreground"
+            asChild
+          >
+            <Link href="/map">Map</Link>
+          </Button>
           <ThemeToggle />
           {user ? (
             <>
