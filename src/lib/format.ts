@@ -10,6 +10,19 @@ export function formatTimeAgo(date: Date) {
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
+/** Exact local timestamp for admin logging (not relative). */
+export function formatExactDateTime(date: Date) {
+  return date.toLocaleString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true,
+  });
+}
+
 export function previewText(body: string, max = 160) {
   const trimmed = body.trim().replace(/\s+/g, " ");
   if (trimmed.length <= max) return trimmed;

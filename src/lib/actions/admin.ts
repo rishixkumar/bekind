@@ -62,6 +62,8 @@ export async function getAdminUsers() {
       lastLoginAt: users.lastLoginAt,
       bannedAt: users.bannedAt,
       createdAt: users.createdAt,
+      signupIp: users.signupIp,
+      signupLocation: users.signupLocation,
       postCount: postCounts.n,
       replyCount: replyCounts.n,
     })
