@@ -100,19 +100,12 @@ export default async function PostPage({
           Replies{" "}
           <span className="font-medium text-muted-foreground">({post.replyCount})</span>
         </h2>
-        {user && !user.isBanned && user.isVerified ? (
+        {user && !user.isBanned ? (
           <div className="rounded-md border border-border bg-card p-4">
             <ReplyForm action={createReplyAction.bind(null, post.id)} />
           </div>
         ) : user?.isBanned ? (
           <p className="text-sm text-muted-foreground">{bannedMessage()}</p>
-        ) : user ? (
-          <p className="text-sm text-muted-foreground">
-            <Link href="/verify" className="font-medium text-foreground underline-offset-2 hover:underline">
-              Confirm your Georgia Tech email
-            </Link>{" "}
-            to reply.
-          </p>
         ) : (
           <p className="text-sm text-muted-foreground">
             <Link href={loginHref} className="font-medium text-foreground underline-offset-2 hover:underline">

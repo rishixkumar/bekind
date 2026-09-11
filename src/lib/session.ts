@@ -35,7 +35,7 @@ export async function getAppUser(): Promise<AppUser | null> {
     username: row.username,
     isAdmin,
     isBanned: Boolean(row.bannedAt),
-    // Admins are never gated, so a non-GT ADMIN_EMAIL can still moderate.
+    // Kept for admin/UI consistency; writes no longer gate on this.
     isVerified: isAdmin || Boolean(row.emailVerifiedAt),
   };
 }
@@ -51,9 +51,6 @@ export async function requireActiveUser() {
   if (user.isBanned) {
     throw new Error("BANNED");
   }
-  if (!user.isVerified) {
-    throw new Error("UNVERIFIED");
-  }
   return user;
 }
 
@@ -64,7 +61,6 @@ export async function requireActiveUser() {
 export function writeGateMessage(error: unknown): string | null {
   if (!(error instanceof Error)) return null;
   if (error.message === "BANNED") return bannedMessage();
-  if (error.message === "UNVERIFIED") return unverifiedMessage();
   return null;
 }
 
@@ -76,8 +72,4 @@ export async function requireAdmin() {
 
 export function bannedMessage() {
   return `Your account can still read ${SITE_NAME}, but posting is paused.`;
-}
-
-export function unverifiedMessage() {
-  return "Confirm your Georgia Tech email before posting — check your inbox for the code.";
 }

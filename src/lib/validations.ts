@@ -52,14 +52,6 @@ export const replySchema = z.object({
   parentId: z.string().uuid().optional().nullable(),
 });
 
-export const verifyCodeSchema = z.object({
-  code: z
-    .string()
-    .trim()
-    .transform((value) => value.replace(/\D/g, ""))
-    .refine((value) => value.length === 6, "Enter the 6-digit code from your email"),
-});
-
 export const reportSchema = z.object({
   reason: z.enum(REPORT_REASONS),
   details: z

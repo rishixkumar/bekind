@@ -23,8 +23,7 @@ export const GT_EMAIL_DOMAINS = [
 /**
  * GT's own alias guidance recommends firstname.lastname@gatech.edu, which is a
  * real mailbox that the username pattern rejects. Flip this to accept those
- * too — the verification email, not the pattern, is what proves the mailbox is
- * real. See docs/gt-email-auth-plan.md.
+ * too if aliases should count. See docs/gt-email-auth-plan.md.
  */
 export const ALLOW_GT_ALIASES = false;
 

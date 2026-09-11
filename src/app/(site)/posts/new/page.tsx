@@ -13,7 +13,6 @@ export default async function NewPostPage() {
       </p>
     );
   }
-  if (!user.isVerified) redirect("/verify");
 
   return (
     <div className="flex flex-col gap-4">
